@@ -1,140 +1,175 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include <iostream>
 
-typedef int ElementType;
-typedef struct Node {
-    ElementType data;
-    struct Node *next;
-} Node, *LinkedList;
+using namespace std;
 
-/**
- * 链表头插法
- * @param Node
- */
-void LinkedHeadInsert(LinkedList &Node) {
-    Node = (LinkedList) malloc(sizeof(Node));
-    Node->next = NULL;
-    ElementType x;
-    scanf("%d", &x);
-    LinkedList s;
-    while (x != 9999) {
-        s = (LinkedList) malloc(sizeof(Node));
-        s->data = x;
-        s->next = Node->next;
-        Node->next = s;
-        scanf("%d", &x);
+#define OK 1
+#define ERROR 0
+
+typedef int ElemType;
+typedef int Status;
+typedef struct LNode {
+    ElemType data;
+    struct LNode *next;
+} LNode, *LinkList;
+
+class LinkedList {
+private:
+public:
+    Status InitList(LinkList &L) {
+        L = new LNode;
+        L->next = NULL;
+        return OK;
     }
-}
 
-/**
- * 链表尾插法
- * @param Node
- */
-void LinkedTailInsert(LinkedList &Node) {
-    Node = (LinkedList) malloc(sizeof(Node));
-    Node->next = NULL;
-    ElementType x;
-    scanf("%d", &x);
-    LinkedList s, r = Node;
-    while (x != 9999) {
-        s = (LinkedList) malloc(sizeof(Node));
-        s->data = x;
-        r->next = s;
-        r = s;
-        scanf("%d", &x);
+    bool IsEmpty(LinkList L) {
+        if (L->next) return false;
+        else return true;
     }
-    r->next = NULL; // 最后一个节点的Next为NULL
-}
 
-/**
- * 打印链表
- * @param Node
- */
-void PrintList(LinkedList Node) {
-    Node = Node->next; // 头结点不打印
-    while (Node != NULL) {
-        printf("%3d", Node->data);
-        Node = Node->next;
+    Status DestroyList(LinkList &L) {
+        LNode *p;
+        while (L) {
+            p = L;
+            L = L->next;
+            delete (p);
+        }
+        return OK;
     }
-    printf("\n");
-}
 
-/**
- * 获取Index位置结点地址
- * @param Node
- * @param index
- * @return
- */
-LinkedList GetElement(LinkedList Node, int index) {
-    int i = 0;
-    if (index < 0) return NULL;
-    while (Node && i < index) {
-        Node = Node->next;
-        i++;
+    Status ClearList(LinkList &L) {
+        LNode *p, *q;
+        p = L->next;
+        while (p) {
+            q = p->next;
+            delete (p);
+            p = q;
+        }
+        L->next = NULL;
+        return OK;
     }
-    return Node;
-}
 
-/**
- * 根据Value查结点地址
- * @param Node
- * @param value
- * @return
- */
-LinkedList LocateElement(LinkedList Node, ElementType value) {
-    while (Node) {
-        if (Node->data == value)return Node;
-        Node = Node->next;
+    int ListLength(LinkList &L) {
+        LNode *p;
+        p = L->next;
+        int i = 0;
+        while (p) {
+            i++;
+            p = p->next;
+        }
+        return i;
     }
-    return NULL;
-}
 
-/**
- * 在指定位置插入结点
- * @param Node
- * @param index
- * @param value
- * @return
- */
-bool LinkedFrontInsert(LinkedList &Node, int index, ElementType value) {
-    LinkedList p = GetElement(Node, index - 1);
-    if (NULL == p)return false;
+    Status GetElem(LinkList &L, int index, ElemType &e) {
+        LNode *p = L->next;
+        int j = 0;
+        while (p && j < index) {
+            p = p->next;
+            ++j;
+        }
+        if (!p || j > index)return ERROR;
+        e = p->data;
+        return OK;
+    }
 
-    LinkedList newNode;
-    newNode = (LinkedList) malloc(sizeof(Node));
-    newNode->data = value;
-    newNode->next = p->next;
-    p->next = newNode;
-    return true;
-}
+    LNode *LocateElem(LinkList L, ElemType e) {
+        LNode *p = L->next;
+        while (p && p->data != e) p = p->next;
+        return p;
+    }
 
-/**
- * 删除Index结点位置元素
- * @param Node
- * @param index
- * @return
- */
-bool LinkedRemoveByIndex(LinkedList &Node, int index) {
-    LinkedList p = GetElement(Node, index - 1);
-    if (NULL == p)return false;
-    LinkedList temp;
-    if (NULL == p->next) return false;
-    temp = p->next;
-    p->next = temp->next;
-    free(temp);
-    temp = NULL;
-    return true;
-}
+    int LocateElemIndex(LinkList L, ElemType e) {
+        LNode *p = L->next;
+        int j = 1;
+        while (p && p->data != e) {
+            p = p->next;
+            j++;
+        }
+        if (p)return j;
+        else return 0;
+    }
+
+    Status ListInsert(LinkList &L, int index, ElemType e) {
+        LNode *p = L;
+        int j = 0;
+        while (p && j < index) {
+            p = p->next;
+            j++;
+        }
+        if (!p || j > index) return ERROR;
+        LNode *s = new LNode;
+        s->data = e;
+        s->next = p->next;
+        p->next = s;
+        return OK;
+    }
+
+    Status ListDelete(LinkList &L, int index, ElemType &e) {
+        LNode *p = L;
+        int j = 0;
+        while (p && j < index) {
+            p = p->next;
+            j++;
+        }
+        if (!p->next || j > index) return ERROR;
+        LNode *q = p->next; // 暂存需要删除的节点
+        p->next = q->next;
+        e = q->data;
+        delete q;
+        return OK;
+    }
+
+    // 头插法
+    void CreateListHead(LinkList &L, int n) {
+        L = new LNode;
+        L->next = NULL;
+        for (int i = n; i > 0; --i) {
+            LNode *p = new LNode;
+            cin >> p->data;
+            p->next = L->next;
+            L->next = p;
+        }
+    }
+
+    // 尾插法
+    void CreateListTail(LinkList &L, int n) {
+        L = new LNode;
+        L->next = NULL;
+        LNode *r = L; // 尾指针
+        for (int i = 0; i < n; i++) {
+            LNode *p = new LNode;
+            cin >> p->data;
+            p->next = NULL;
+            r->next = p;
+            r = p;
+        }
+    }
+
+    // 打印链表
+    void PrintList(LinkList L) {
+        L = L->next;
+        while (L != NULL) {
+            printf("%3d", L->data);  // 打印当前结点数据
+            L = L->next;             // 指向下一个结点
+        }
+        printf("\n");
+    }
+};
 
 
 int main() {
-    LinkedList node;
-    LinkedTailInsert(node);
-    LinkedList res = GetElement(node, 2);
-    printf("%d\n", res->data);
-    LinkedFrontInsert(node, 2, 99);
-    PrintList(node);
-    LinkedRemoveByIndex(node, 4);
-    PrintList(node);
-    return 0;
+    LinkList L;
+    LinkedList s;
+    s.InitList(L);
+    s.CreateListTail(L, 5);
+    s.PrintList(L);
+
+    ElemType e;
+    s.GetElem(L, 2, e);
+    printf("%d\n", e);
+    s.ListInsert(L, 2, 99);
+    s.PrintList(L);
+    s.ListDelete(L, 4, e);
+    printf("%d\n", e);
+    s.PrintList(L);
+
 }
